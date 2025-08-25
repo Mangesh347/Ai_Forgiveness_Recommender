@@ -1,0 +1,17 @@
+# Ignore Flutter/Dart build files
+.dart_tool/
+build/
+.flutter-plugins
+.flutter-plugins-dependencies
+
+# Ignore IDEs and OS files
+.vscode/
+.metadata
+*.iml
+.idea/
+node_modules/
+*.env
+
+# Ignore virtual environments
+venv/
+.venv/
