@@ -44,17 +44,18 @@ The system consists of a **Python backend** (AI logic) and a **Flutter frontend*
 ### 🔧 Installation & Setup
 
 #### 1. Clone the Repository
-```bash
+bash
 git clone https://github.com/<your-username>/ai_forgiveness_recommender_new.git
 cd ai_forgiveness_recommender_new
-2. Start the Backend (Python)
+
+#### 2. Start the Backend (Python)
 Navigate to the backend folder and run the server:
 
 cd forgiveness_backend
 python main.py
 This will start the backend service (keep this terminal running).
 
-3. Start the Frontend (Flutter)
+#### 3. Start the Frontend (Flutter)
 Open a new terminal and run:
 
 # Go to project root
@@ -67,7 +68,7 @@ flutter pub get
 flutter run
 This will launch the Flutter app and connect it to the backend.
 
-📂 Project Structure
+#### 📂 Project Structure
 ai_forgiveness_recommender_new/
 │── forgiveness_backend/        # Python backend (main.py)
 │── lib/                        # Flutter frontend (main.dart + UI components)
