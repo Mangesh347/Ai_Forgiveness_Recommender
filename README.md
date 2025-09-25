@@ -41,21 +41,21 @@ It consists of a **Python backend** (AI logic) and a **Flutter frontend** (cross
 ---
 
 ### 🔧 Installation & Setup
+```bash
+# 1. Clone the Repository
 
-#### 1. Clone the Repository
-``bash
 git clone https://github.com/<your-username>/ai_forgiveness_recommender_new.git
 cd ai_forgiveness_recommender_new
 
-#### 2. Start the Backend (Python)
+# 2. Start the Backend (Python)
 Navigate to the backend folder and run the server:
-``bash
+
 cd forgiveness_backend
 python main.py
 
 This will start the backend service. Keep this terminal running while using the app.
 
-### 3. Start the Frontend (Flutter)
+# 3. Start the Frontend (Flutter)
 Open a new terminal and run:
 
 # Go to project root
