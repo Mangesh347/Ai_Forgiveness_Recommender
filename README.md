@@ -66,5 +66,10 @@ flutter pub get
 
 # Run the app
 flutter run
+or use 
+flutter clean
+flutter pub get
+flutter run -d chrome 
+
 This will launch the Flutter app and connect it to the backend.
 
