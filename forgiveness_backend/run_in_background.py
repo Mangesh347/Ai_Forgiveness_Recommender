@@ -7,7 +7,7 @@ def run_in_background():
 
 if __name__ == "__main__":
     run_in_background()
-    print("Your script is now running in the background!")
+    print("Your Flask app is now running in the background!")
 
     # Keep the main script alive while the background script runs
     while True:

@@ -1,0 +1,296 @@
+
+
+# from flask import Flask, request, jsonify
+# from flask_cors import CORS
+# import requests
+# import re
+# import os
+
+# app = Flask(__name__)
+# CORS(app, resources={r"/*": {"origins": "*"}}, supports_credentials=True)
+
+# # ---- CONFIG ----
+# API_KEY = os.getenv(
+#     "OPENROUTER_KEY",
+#     "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",
+# )
+# URL = "https://openrouter.ai/api/v1/chat/completions"
+
+# # In-memory DB { email: {"username":..., "password":..., "history": [...] } }
+# users = {}
+
+# # Religion → language mapping (all to English)
+# RELIGION_LANG = {
+#     "Hinduism": "en",
+#     "Christianity": "en",
+#     "Islam": "en",
+#     "Buddhism": "en",
+#     "Sikhism": "en",
+#     "Judaism": "en",
+#     "Baháʼí Faith": "en",
+#     "Jainism": "en",
+#     "Shinto": "en",
+#     "Taoism / Daoism": "en",
+# }
+
+# # ---- UTILITIES ----
+# def clean_response(text: str) -> str:
+#     if not text:
+#         return "No advice received."
+#     text = re.sub(r"◁think▷.*?◁/think▷", "", text, flags=re.DOTALL)
+#     text = re.sub(r"\$\s*\d+\s*:", "", text)
+#     text = re.sub(r"^\s*[\d]+\s*[:.]\s*", "", text, flags=re.MULTILINE)
+#     text = text.replace("$", "")
+#     text = re.sub(r"\n{2,}", "\n", text)
+#     text = text.strip().split("\n")[0]
+#     return text.strip()
+
+# def get_openrouter_response(conflict_description, religion, language, format_request=None):
+#     prompt = (
+#         f"Always respond in a forgiving, gentle, and empathetic tone.\n"
+#         f"If the user sends greetings or off-topic messages, respond in a forgiving way and ask 'How can I help you today?'.\n"
+#         f"Conflict: {conflict_description}\n"
+#         f"Religion: {religion}\n"
+#         f"Respond only in {language} using the cultural tone of {religion}.\n"
+#         f"Do not include code, stories, or mixed languages.\n"
+#         f"Adjust the answer length based on the length of the conflict description.\n"
+#     )
+#     if format_request:
+#         prompt += f"Provide the answer in the format requested by the user: {format_request}\n"
+#     else:
+#         prompt += "Answer naturally in one paragraph.\n"
+
+#     payload = {
+#         "model": "z-ai/glm-4.5-air:free",
+#         "messages": [{"role": "user", "content": prompt}],
+#         "stream": False,
+#     }
+#     headers = {"Authorization": f"Bearer {API_KEY}", "Content-Type": "application/json"}
+#     try:
+#         r = requests.post(URL, json=payload, headers=headers, timeout=20)
+#         if r.status_code == 200:
+#             data = r.json()
+#             raw = data.get("choices", [{}])[0].get("message", {}).get("content", "")
+#             return clean_response(raw)
+#         return f"API error {r.status_code}: {r.text}"
+#     except Exception as e:
+#         return f"Request failed: {e}"
+
+# # ---- ROUTES ----
+# @app.route("/signup", methods=["POST"])
+# def signup():
+#     data = request.get_json()
+#     username = data.get("username", "").strip()
+#     email = data.get("email", "").strip()
+#     password = data.get("password", "").strip()
+
+#     if not username or not email or not password:
+#         return jsonify({"error": "All fields are required"}), 400
+#     if email in users:
+#         return jsonify({"error": "Email already exists"}), 400
+
+#     users[email] = {"username": username, "password": password, "history": []}
+#     return jsonify({"message": "Signup successful"}), 200
+
+# @app.route("/login", methods=["POST"])
+# def login():
+#     data = request.get_json()
+#     email = data.get("email", "").strip()
+#     password = data.get("password", "").strip()
+#     u = users.get(email)
+#     if not u or u["password"] != password:
+#         return jsonify({"error": "Invalid email or password"}), 400
+#     return jsonify({"username": u["username"], "email": email, "history": u["history"]})
+
+# @app.route("/get_advice", methods=["POST"])
+# def get_advice():
+#     data = request.get_json()
+#     email = data.get("email", "").strip()
+#     conflict = data.get("conflict_description", "").strip()
+#     religion = data.get("religion", "").strip()
+#     format_request = data.get("answer_format", None)
+
+#     if not email or email not in users:
+#         return jsonify({"error": "Invalid user"}), 400
+
+#     if not conflict:
+#         return jsonify({
+#             "advice": "Hello! Please describe your conflict, so I can give you forgiveness advice.",
+#             "history": users[email]["history"],
+#         })
+
+#     if religion not in RELIGION_LANG:
+#         return jsonify({"error": "Unsupported religion"}), 400
+
+#     advice = get_openrouter_response(conflict, religion, "en", format_request)
+
+#     chat_item = {
+#         "title": conflict[:25] + "...",
+#         "religion": religion,
+#         "messages": [
+#             {"message": conflict, "sender": "user"},
+#             {
+#                 "message": advice,
+#                 "sender": "AI",
+#                 "original": advice,
+#                 "currentLang": "en",
+#             },
+#         ],
+#     }
+#     users[email]["history"].append(chat_item)
+#     return jsonify({"advice": advice, "history": users[email]["history"]})
+
+# if __name__ == "__main__":
+#     app.run(host="0.0.0.0", port=5000, debug=True)
+# --------------------------------------------------------------------------------------------------------------------
+
+
+# from flask import Flask, request, jsonify
+# from flask_cors import CORS
+# import requests
+# import re
+# import os
+
+# app = Flask(__name__)
+# CORS(app, resources={r"/*": {"origins": "*"}}, supports_credentials=True)
+
+# # ---- CONFIG ----
+# API_KEY = os.getenv(
+#     "OPENROUTER_KEY",
+#     "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",
+# )
+# URL = "https://openrouter.ai/api/v1/chat/completions"
+
+# # In-memory DB { email: {"username":..., "password":..., "history": [...] } }
+# users = {}
+
+# # Religion → language mapping (all to English)
+# RELIGION_LANG = {
+#     "Hinduism": "en",
+#     "Christianity": "en",
+#     "Islam": "en",
+#     "Buddhism": "en",
+#     "Sikhism": "en",
+#     "Judaism": "en",
+#     "Baháʼí Faith": "en",
+#     "Jainism": "en",
+#     "Shinto": "en",
+#     "Taoism / Daoism": "en",
+# }
+
+# # ---- UTILITIES ----
+# def clean_response(text: str) -> str:
+#     if not text:
+#         return "No advice received."
+#     text = re.sub(r"◁think▷.*?◁/think▷", "", text, flags=re.DOTALL)
+#     text = re.sub(r"\$\s*\d+\s*:", "", text)
+#     text = re.sub(r"^\s*[\d]+\s*[:.]\s*", "", text, flags=re.MULTILINE)
+#     text = text.replace("$", "")
+#     text = re.sub(r"\n{2,}", "\n", text)
+#     text = text.strip().split("\n")[0]
+#     return text.strip()
+
+# def get_openrouter_response(conflict_description, religion, language, user_message=None):
+#     """
+#     Generate AI response in forgiving, empathetic, and casual style matching user's vibe.
+#     """
+#     vibe_instruction = "Respond in the same casual, friendly, conversational tone as the user message."
+#     if not user_message:
+#         user_message = conflict_description
+
+#     prompt = (
+#         f"Always respond in a forgiving, gentle, and empathetic tone.\n"
+#         f"Match the user's language ,style and vibe in your answer.\n"
+#         f"If the user sends casual messages (slang, emojis, short forms), respond in the same way.\n"
+#         f"Conflict: {conflict_description}\n"
+#         f"User message vibe: {user_message}\n"
+#         f"Religion: {religion}\n"
+#         f"Respond only in {language} using the cultural tone of {religion}.\n"
+#         f"Do not include code, stories, or mixed languages.\n"
+#         f"Answer naturally in one paragraph in the vibe of the user.\n"
+#     )
+
+#     payload = {
+#         "model": "z-ai/glm-4.5-air:free",
+#         "messages": [{"role": "user", "content": prompt}],
+#         "stream": False,
+#     }
+#     headers = {"Authorization": f"Bearer {API_KEY}", "Content-Type": "application/json"}
+#     try:
+#         r = requests.post(URL, json=payload, headers=headers, timeout=20)
+#         if r.status_code == 200:
+#             data = r.json()
+#             raw = data.get("choices", [{}])[0].get("message", {}).get("content", "")
+#             return clean_response(raw)
+#         return f"API error {r.status_code}: {r.text}"
+#     except Exception as e:
+#         return f"Request failed: {e}"
+
+# # ---- ROUTES ----
+# @app.route("/signup", methods=["POST"])
+# def signup():
+#     data = request.get_json()
+#     username = data.get("username", "").strip()
+#     email = data.get("email", "").strip()
+#     password = data.get("password", "").strip()
+
+#     if not username or not email or not password:
+#         return jsonify({"error": "All fields are required"}), 400
+#     if email in users:
+#         return jsonify({"error": "Email already exists"}), 400
+
+#     users[email] = {"username": username, "password": password, "history": []}
+#     return jsonify({"message": "Signup successful"}), 200
+
+# @app.route("/login", methods=["POST"])
+# def login():
+#     data = request.get_json()
+#     email = data.get("email", "").strip()
+#     password = data.get("password", "").strip()
+#     u = users.get(email)
+#     if not u or u["password"] != password:
+#         return jsonify({"error": "Invalid email or password"}), 400
+#     return jsonify({"username": u["username"], "email": email, "history": u["history"]})
+
+# @app.route("/get_advice", methods=["POST"])
+# def get_advice():
+#     data = request.get_json()
+#     email = data.get("email", "").strip()
+#     conflict = data.get("conflict_description", "").strip()
+#     religion = data.get("religion", "").strip()
+#     format_request = data.get("answer_format", None)
+
+#     if not email or email not in users:
+#         return jsonify({"error": "Invalid user"}), 400
+
+#     if not conflict:
+#         return jsonify({
+#             "advice": "Hello! Please describe your conflict, so I can give you forgiveness advice.",
+#             "history": users[email]["history"],
+#         })
+
+#     if religion not in RELIGION_LANG:
+#         return jsonify({"error": "Unsupported religion"}), 400
+
+#     advice = get_openrouter_response(conflict, religion, "en", user_message=conflict)
+
+#     chat_item = {
+#         "title": conflict[:25] + "...",
+#         "religion": religion,
+#         "messages": [
+#             {"message": conflict, "sender": "user"},
+#             {
+#                 "message": advice,
+#                 "sender": "AI",
+#                 "original": advice,
+#                 "currentLang": "en",
+#             },
+#         ],
+#     }
+#     users[email]["history"].append(chat_item)
+#     return jsonify({"advice": advice, "history": users[email]["history"]})
+
+# if __name__ == "__main__":
+#     app.run(host="0.0.0.0", port=5000, debug=True)
+# --------------------------------------------------------------------------------------------------------------------
+

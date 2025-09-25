@@ -1,0 +1,254 @@
+import 'dart:convert';
+import 'package:flutter/material.dart';
+import 'package:http/http.dart' as http;
+import 'package:font_awesome_flutter/font_awesome_flutter.dart';
+
+void main() {
+  runApp(MyApp());
+}
+
+class MyApp extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    return MaterialApp(
+      title: 'AI Forgiveness Recommender',
+      theme: ThemeData.dark().copyWith(
+        primaryColor: Colors.black,
+        scaffoldBackgroundColor: Colors.black,
+        textTheme: TextTheme(bodyMedium: TextStyle(color: Colors.white)),
+      ),
+      home: AIChatScreen(),
+    );
+  }
+}
+
+class AIChatScreen extends StatefulWidget {
+  @override
+  _AIChatScreenState createState() => _AIChatScreenState();
+}
+
+class _AIChatScreenState extends State<AIChatScreen> {
+  final List<String> religions = [
+    "General Recommendation",
+    "Hinduism",
+    "Christianity",
+    "Islam",
+    "Buddhism",
+    "Judaism",
+    "Sikhism",
+  ];
+  String selectedReligion = "General Recommendation";
+  final TextEditingController _controller = TextEditingController();
+  String advice = "";
+
+  // Define chatHistory to store user and AI messages
+  List<Map<String, String>> chatHistory = [
+    {"message": "How can I seek forgiveness?", "sender": "user"},
+    {
+      "message": "We can discuss your journey based on your religion.",
+      "sender": "AI",
+    },
+  ];
+
+  // Function to call Flask API and get advice
+  Future<void> getAdvice(String conflictDescription, String religion) async {
+    // Check if conflictDescription is empty
+    if (conflictDescription.isEmpty) {
+      setState(() {
+        advice = "Please enter a conflict description.";
+      });
+      return;
+    }
+
+    // Add user question to chat history
+    setState(() {
+      chatHistory.add({
+        "message": conflictDescription,
+        "sender": "user",
+      });
+      // Add AI response placeholder
+      chatHistory.add({
+        "message": "Processing...",
+        "sender": "AI",
+      });
+    });
+
+    // Fetch advice from the backend
+    final response = await http.get(
+      Uri.parse(
+        'http://127.0.0.1:5000/get_advice?conflict_description=$conflictDescription&religion=$religion',
+      ),
+    );
+
+    if (response.statusCode == 200) {
+      final Map<String, dynamic> data = json.decode(response.body);
+      setState(() {
+        advice = data["advice"] ?? "No advice received.";
+        // Update the latest "Processing..." with actual advice
+        chatHistory[chatHistory.length - 1] = {
+          "message": advice, // Add the actual AI response
+          "sender": "AI",
+        };
+      });
+    } else {
+      setState(() {
+        advice = "Failed to get advice.";
+      });
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(title: Text('Forgiveness Recommender')),
+      drawer: Sidebar(),
+      body: Column(
+        children: [
+          // Custom DropdownButton for religion with General Recommendation icon beside it
+          Padding(
+            padding: const EdgeInsets.all(8.0),
+            child: Row(
+              children: [
+                // DropdownButton for selecting religion
+                DropdownButton<String>(
+                  value: selectedReligion,
+                  onChanged: (newValue) {
+                    setState(() {
+                      selectedReligion = newValue!;
+                    });
+                  },
+                  icon: Image.asset(
+                    'assets/general_recommendation_icon.png', // General recommendation icon
+                    height: 20,
+                    width: 20,
+                  ),
+                  items: religions.map((String religion) {
+                    return DropdownMenuItem<String>(
+                      value: religion,
+                      child: Row(
+                        children: [
+                          Text(religion, style: TextStyle(color: Colors.white)),
+                          if (religion == 'General Recommendation')
+                            Padding(
+                              padding: const EdgeInsets.only(left: 8.0),
+                            ),
+                        ],
+                      ),
+                    );
+                  }).toList(),
+                ),
+              ],
+            ),
+          ),
+
+          // Display Chat Messages (User and AI)
+          Expanded(
+            child: ListView.builder(
+              itemCount: chatHistory.length,
+              itemBuilder: (context, index) {
+                final isUserMessage = chatHistory[index]["sender"] == "user";
+                return Padding(
+                  padding: const EdgeInsets.symmetric(vertical: 5),
+                  child: Align(
+                    alignment: isUserMessage
+                        ? Alignment.centerRight // User's message on the right
+                        : Alignment.centerLeft, // AI's message on the left
+                    child: Container(
+                      padding: EdgeInsets.symmetric(
+                        vertical: 10,
+                        horizontal: 15,
+                      ),
+                      decoration: BoxDecoration(
+                        color: isUserMessage
+                            ? Colors.blue[100]
+                            : Colors.grey[800],
+                        borderRadius: BorderRadius.circular(15),
+                      ),
+                      child: Text(
+                        chatHistory[index]["message"]!,
+                        style: TextStyle(
+                          color: isUserMessage ? Colors.black : Colors.white,
+                        ),
+                      ),
+                    ),
+                  ),
+                );
+              },
+            ),
+          ),
+
+          // Ask Me Anything input field and Send Button
+          Padding(
+            padding: const EdgeInsets.all(8.0),
+            child: Row(
+              children: [
+                Expanded(
+                  child: TextField(
+                    controller: _controller,
+                    style: TextStyle(color: Colors.white),
+                    decoration: InputDecoration(
+                      hintText: 'Ask anything...',
+                      hintStyle: TextStyle(color: Colors.white60),
+                      border: OutlineInputBorder(
+                        borderSide: BorderSide(color: Colors.white60),
+                      ),
+                    ),
+                  ),
+                ),
+                IconButton(
+                  icon: Image.asset(
+                    'assets/send_button.png', // Send button icon
+                    height: 50,
+                  ),
+                  onPressed: () {
+                    // Send user message and fetch advice
+                    getAdvice(_controller.text, selectedReligion);
+                    _controller.clear(); // Clear the input field
+                  },
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class Sidebar extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    return Drawer(
+      backgroundColor: Colors.black,
+      child: ListView(
+        children: [
+          // Logo Section
+          InkWell(
+            onTap: () {
+              // You can trigger any event here or use Navigator to go to a new page
+            },
+            child: Padding(
+              padding: const EdgeInsets.all(8.0),
+              child: Image.asset(
+                'assets/Recommder_Logo.png', // Ensure this matches the path in your assets folder
+                height: 100,
+                width: 150,
+              ),
+            ),
+          ),
+          ListTile(
+            leading: Icon(FontAwesomeIcons.book, color: Colors.white),
+            title: Text('Chat History', style: TextStyle(color: Colors.white)),
+            onTap: () {},
+          ),
+          ListTile(
+            leading: Icon(FontAwesomeIcons.cogs, color: Colors.white),
+            title: Text('Settings', style: TextStyle(color: Colors.white)),
+            onTap: () {},
+          ),
+        ],
+      ),
+    );
+  }
+}
+------------------------------dart-------------------------------------------------------
