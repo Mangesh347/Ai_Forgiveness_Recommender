@@ -3,8 +3,8 @@
 [![Flutter](https://img.shields.io/badge/Flutter-02569B?logo=flutter&logoColor=white)](https://flutter.dev/)  
 [![Python](https://img.shields.io/badge/Python-3776AB?logo=python&logoColor=white)](https://www.python.org/)  
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)  
-[![GitHub stars](https://img.shields.io/github/stars/<your-username>/ai_forgiveness_recommender_new?style=social)](https://github.com/<your-username>/ai_forgiveness_recommender_new/stargazers)  
-[![GitHub forks](https://img.shields.io/github/forks/<your-username>/ai_forgiveness_recommender_new?style=social)](https://github.com/<your-username>/ai_forgiveness_recommender_new/network/members)  
+[![GitHub stars](https://img.shields.io/github/stars/<Mangesh347>/ai_forgiveness_recommender_new?style=social)](https://github.com/<your-username>/ai_forgiveness_recommender_new/stargazers)  
+[![GitHub forks](https://img.shields.io/github/forks/<Mangesh347>/ai_forgiveness_recommender_new?style=social)](https://github.com/<your-username>/ai_forgiveness_recommender_new/network/members)  
 
 ---
 
