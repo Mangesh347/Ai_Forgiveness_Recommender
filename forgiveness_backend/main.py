@@ -11,7 +11,7 @@
 # # ---- CONFIG ----
 # API_KEY = os.getenv(
 #     "OPENROUTER_KEY",
-#     "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",
+#     "",
 # )
 # URL = "https://openrouter.ai/api/v1/chat/completions"
 
@@ -165,7 +165,7 @@ CORS(app, resources={r"/*": {"origins": "*"}}, supports_credentials=True)
 # ---- CONFIG ----
 API_KEY = os.getenv(
     "OPENROUTER_KEY",
-    "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",
+    "",
 )
 URL = "https://openrouter.ai/api/v1/chat/completions"
 
